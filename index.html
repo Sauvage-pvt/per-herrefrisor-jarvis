@@ -83,21 +83,76 @@ function addMsg(text, isUser) {
   document.getElementById('messages').appendChild(div);
   document.getElementById('messages').scrollTop = 9999;
 }
-let booking = {};
+let booking = { active: false, time: null, name: null };
+
 function respond(text) {
-  const q = text.toLowerCase();
-  if (q.match(/åpning|åpent|stengt/)) { addMsg(data.hours); }
-  else if (q.match(/pris|koster/)) { addMsg(data.prices); }
-  else if (q.match(/book|bestill|time/)) {
-    if (q.includes('14')) { booking.time = '14:00 i morgen'; addMsg('14:00 i morgen er ledig. Hva heter du?'); }
-    else { addMsg('Ledige tider i morgen: ' + data.slots.join(', ') + '. Hvilken passer?'); }
-  } else if (q.match(/whatsapp|wa/)) { addMsg(data.wa); }
-  else if (q.match(/heter|navn|jeg er/)) {
+  const q = text.toLowerCase().trim();
+
+  // Avbryt / bytt tema
+  if (q.match(/avbryt|stopp|nei|annet|noe annet|start på nytt|glem/)) {
+    booking = { active: false, time: null, name: null };
+    addMsg('Ok, avbrutt. Hva kan jeg hjelpe med? Åpningstider, priser, booking eller WhatsApp?');
+    return;
+  }
+
+  // Åpningstider
+  if (q.match(/åpning|åpent|stengt|når/)) {
+    booking.active = false;
+    addMsg(data.hours);
+    return;
+  }
+
+  // Priser
+  if (q.match(/pris|koster|kr|klipp|skjegg/)) {
+    booking.active = false;
+    addMsg(data.prices);
+    return;
+  }
+
+  // WhatsApp / kontakt
+  if (q.match(/whatsapp|wa|kontakt|telefon|epost|mail|ring/)) {
+    booking.active = false;
+    if (q.match(/whatsapp|wa/)) addMsg(data.wa);
+    else addMsg('Kontakt: ' + data.contact);
+    return;
+  }
+
+  // Booking
+  if (q.match(/book|bestill|time|ledig/)) {
+    booking.active = true;
+    if (q.includes('14')) {
+      booking.time = '14:00 i morgen';
+      addMsg('14:00 i morgen er ledig. Hva heter du? (eller skriv "avbryt")');
+    } else if (q.includes('10')) {
+      booking.time = '10:00 i morgen';
+      addMsg('10:00 i morgen er ledig. Hva heter du?');
+    } else if (q.includes('16')) {
+      booking.time = '16:00 i morgen';
+      addMsg('16:00 i morgen er ledig. Hva heter du?');
+    } else {
+      addMsg('Ledige tider i morgen: ' + data.slots.join(', ') + '. Hvilken passer?');
+    }
+    return;
+  }
+
+  // Navn under booking
+  if (booking.active && q.match(/heter|navn|jeg er|^[a-zæøå]{2,}$/i)) {
     booking.name = text;
-    addMsg('Takk! Bookingforespørsel registrert for ' + (booking.time || 'valgt tid') + '. Vi sender bekreftelse på WhatsApp / e-post.');
-  } else if (q.match(/kontakt|telefon|epost/)) { addMsg('Kontakt: ' + data.contact); }
-  else { addMsg('Jeg kan svare på åpningstider, priser, booking og WhatsApp. Hva lurer du på?'); }
+    addMsg('Takk ' + text + '! Booking registrert for ' + (booking.time || 'valgt tid') + '. Vi sender bekreftelse på WhatsApp / e-post.');
+    booking = { active: false, time: null, name: null };
+    return;
+  }
+
+  // Hvis i booking og ukjent
+  if (booking.active) {
+    addMsg('Jeg venter på navnet ditt, eller skriv "avbryt" for å gjøre noe annet.');
+    return;
+  }
+
+  // Standard
+  addMsg('Jeg kan svare på åpningstider, priser, booking og WhatsApp. Hva lurer du på?');
 }
+
 function send(text) { if (!text.trim()) return; addMsg(text, true); document.getElementById('sugs')?.remove(); setTimeout(() => respond(text), 350); }
 function sendInput() { const el = document.getElementById('input'); const text = el.value.trim(); if (!text) return; el.value = ''; send(text); }
 </script>
