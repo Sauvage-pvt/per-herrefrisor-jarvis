@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Per Herrefrisør – Jarvis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; }
+  header { background: #1e3a5f; color: white; padding: 20px 32px; }
+  nav { background: #16324f; padding: 12px 32px; display: flex; gap: 20px; }
+  nav a { color: white; text-decoration: none; font-size: 14px; opacity: 0.9; }
+  nav a:hover { opacity: 1; text-decoration: underline; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+  .site { background: white; border-radius: 12px; padding: 28px; border: 1px solid #e2e8f0; }
+  .site h2 { margin-bottom: 4px; color: #1e3a5f; }
+  .site .tagline { color: #64748b; margin-bottom: 20px; }
+  .section { margin-bottom: 16px; }
+  .section h3 { font-size: 14px; color: #475569; margin-bottom: 6px; }
+  .section p { font-size: 14px; line-height: 1.5; }
+  #chat { background: white; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 580px; }
+  .chat-header { background: #1e3a5f; color: white; padding: 14px 16px; border-radius: 12px 12px 0 0; font-weight: 600; }
+  .messages { flex: 1; overflow-y: auto; padding: 16px; }
+  .msg { margin-bottom: 10px; max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; }
+  .msg.bot { background: #f1f5f9; }
+  .msg.user { background: #1e3a5f; color: white; margin-left: auto; }
+  .input-row { display: flex; padding: 12px; gap: 8px; border-top: 1px solid #e2e8f0; }
+  .input-row input { flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; }
+  .input-row button { background: #1e3a5f; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; }
+  .sugs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .sug { background: #e2e8f0; border: none; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+  .wa { color: #25D366; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Per Herrefrisør</h1>
+  <p style="opacity:0.8;font-size:14px;">Jarvis-demo for Steinkjer Utvikling</p>
+</header>
+<nav>
+  <a href="index.html">Jarvis-chat</a>
+  <a href="wecall-test.html">Telefon (WeCall)</a>
+  <a href="sms-oppfolging.html">SMS-oppfølging</a>
+</nav>
+<div class="container">
+  <div class="site">
+    <h2>Per Herrefrisør</h2>
+    <p class="tagline">Steinkjer · Klassisk herrefrisør</p>
+    <div class="section"><h3>Åpningstider</h3><p>Mandag–fredag 09:00–17:00. Stengt helg. Drop-in etter kl. 12.</p></div>
+    <div class="section"><h3>Tjenester</h3><p>Klipp 450 kr · Skjegg 250 kr · Klipp + skjegg 650 kr</p></div>
+    <div class="section"><h3>Booking</h3><p>Ledige tider i morgen: 10:00, 14:00, 16:00</p></div>
+    <div class="section"><h3>Kontakt</h3><p>post@perherrefrisor.no · 74 12 34 56<br><span class="wa">WhatsApp tilgjengelig</span></p></div>
+  </div>
+  <div id="chat">
+    <div class="chat-header">Jarvis</div>
+    <div class="messages" id="messages">
+      <div class="msg bot">Hei! Jeg er Jarvis, AI-assistenten til Per Herrefrisør. Spør meg om åpningstider, priser eller book en time.</div>
+      <div class="sugs" id="sugs">
+        <button class="sug" onclick="send('Åpningstider')">Åpningstider</button>
+        <button class="sug" onclick="send('Priser')">Priser</button>
+        <button class="sug" onclick="send('Book time i morgen kl 14')">Book time</button>
+        <button class="sug" onclick="send('WhatsApp')">WhatsApp</button>
+      </div>
+    </div>
+    <div class="input-row">
+      <input type="text" id="input" placeholder="Skriv her..." onkeypress="if(event.key==='Enter')sendInput()">
+      <button onclick="sendInput()">➤</button>
+    </div>
+  </div>
+</div>
+<script>
+const data = {
+  hours: 'Mandag–fredag 09:00–17:00. Stengt i helgene. Drop-in etter kl. 12.',
+  prices: 'Klipp 450 kr, skjegg 250 kr, klipp + skjegg 650 kr.',
+  slots: ['10:00', '14:00', '16:00'],
+  contact: 'post@perherrefrisor.no eller 74 12 34 56',
+  wa: 'Du kan også sende melding på WhatsApp – vi svarer så fort vi kan.'
+};
+function addMsg(text, isUser) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isUser ? 'user' : 'bot');
+  div.textContent = text;
+  document.getElementById('messages').appendChild(div);
+  document.getElementById('messages').scrollTop = 9999;
+}
+let booking = { active: false, time: null, name: null };
+
+function respond(text) {
+  const q = text.toLowerCase().trim();
+
+  // Avbryt / bytt tema
+  if (q.match(/avbryt|stopp|nei|annet|noe annet|start på nytt|glem/)) {
+    booking = { active: false, time: null, name: null };
+    addMsg('Ok, avbrutt. Hva kan jeg hjelpe med? Åpningstider, priser, booking eller WhatsApp?');
+    return;
+  }
+
+  // Åpningstider
+  if (q.match(/åpning|åpent|stengt|når/)) {
+    booking.active = false;
+    addMsg(data.hours);
+    return;
+  }
+
+  // Priser
+  if (q.match(/pris|koster|kr|klipp|skjegg/)) {
+    booking.active = false;
+    addMsg(data.prices);
+    return;
+  }
+
+  // WhatsApp / kontakt
+  if (q.match(/whatsapp|wa|kontakt|telefon|epost|mail|ring/)) {
+    booking.active = false;
+    if (q.match(/whatsapp|wa/)) addMsg(data.wa);
+    else addMsg('Kontakt: ' + data.contact);
+    return;
+  }
+
+  // Booking
+  if (q.match(/book|bestill|time|ledig/)) {
+    booking.active = true;
+    if (q.includes('14')) {
+      booking.time = '14:00 i morgen';
+      addMsg('14:00 i morgen er ledig. Hva heter du? (eller skriv "avbryt")');
+    } else if (q.includes('10')) {
+      booking.time = '10:00 i morgen';
+      addMsg('10:00 i morgen er ledig. Hva heter du?');
+    } else if (q.includes('16')) {
+      booking.time = '16:00 i morgen';
+      addMsg('16:00 i morgen er ledig. Hva heter du?');
+    } else {
+      addMsg('Ledige tider i morgen: ' + data.slots.join(', ') + '. Hvilken passer?');
+    }
+    return;
+  }
+
+  // Navn under booking
+  if (booking.active && q.match(/heter|navn|jeg er|^[a-zæøå]{2,}$/i)) {
+    booking.name = text;
+    addMsg('Takk ' + text + '! Booking registrert for ' + (booking.time || 'valgt tid') + '. Vi sender bekreftelse på WhatsApp / e-post.');
+    booking = { active: false, time: null, name: null };
+    return;
+  }
+
+  // Hvis i booking og ukjent
+  if (booking.active) {
+    addMsg('Jeg venter på navnet ditt, eller skriv "avbryt" for å gjøre noe annet.');
+    return;
+  }
+
+  // Standard
+  addMsg('Jeg kan svare på åpningstider, priser, booking og WhatsApp. Hva lurer du på?');
+}
+
+// AI-chat via Workers AI. Faller tilbake til de faste svarene over hvis AI ikke svarer.
+const historikk = [{ rolle: 'jarvis', tekst: 'Hei! Spør meg om åpningstider, priser eller book en time.' }];
+async function send(text) {
+  if (!text.trim()) return;
+  addMsg(text, true);
+  document.getElementById('sugs')?.remove();
+  historikk.push({ rolle: 'bruker', tekst: text });
+  const venter = document.createElement('div');
+  venter.className = 'msg bot'; venter.textContent = '…';
+  document.getElementById('messages').appendChild(venter);
+  document.getElementById('messages').scrollTop = 9999;
+  try {
+    const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ meldinger: historikk }) });
+    const j = await r.json();
+    if (!r.ok || !j.svar) throw new Error(j.feil || 'Feil ' + r.status);
+    venter.remove();
+    addMsg(j.svar);
+    historikk.push({ rolle: 'jarvis', tekst: j.svar });
+  } catch (e) {
+    console.warn('AI utilgjengelig, bruker faste svar:', e.message);
+    venter.remove();
+    respond(text);
+  }
+}
+function sendInput() { const el = document.getElementById('input'); const text = el.value.trim(); if (!text) return; el.value = ''; send(text); }
+</script>
+</body>
+</html>

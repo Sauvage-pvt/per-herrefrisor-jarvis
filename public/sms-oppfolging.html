@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMS Oppfølging – Fyll kalenderen</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  header { background: #1e3a5f; color: white; padding: 48px 32px; text-align: center; }
+  header h1 { font-size: 36px; margin-bottom: 8px; }
+  header p { opacity: 0.85; font-size: 18px; }
+  .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+  .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+  .card h2 { color: #1e3a5f; margin-bottom: 12px; font-size: 22px; }
+  .card ul { padding-left: 20px; }
+  .card li { margin-bottom: 8px; }
+  .example { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 0 8px 8px 0; margin-top: 12px; font-size: 15px; }
+  .example strong { color: #166534; }
+  .cta { text-align: center; margin-top: 32px; }
+  .btn { background: #1e3a5f; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; }
+  footer { text-align: center; padding: 32px; color: #64748b; font-size: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>SMS Oppfølging</h1>
+  <p>Fyll stille dager · Bekreft bookinger · Selg til eksisterende kunder</p>
+</header>
+<div class="container">
+  <div class="card">
+    <h2>Hva det gjør</h2>
+    <ul>
+      <li><strong>Booking-bekreftelse</strong> – Når noen booker time, sendes automatisk SMS med tid, sted og kontaktinfo.</li>
+      <li><strong>Påminnelse</strong> – SMS dagen før eller noen timer før timen.</li>
+      <li><strong>Stille dager</strong> – Når det er få bookinger, send SMS til tidligere kunder med tilbud eller «ledig i dag».</li>
+      <li><strong>Sesongkampanjer</strong> – Automatisk SMS før jul, 17. mai, sommerferie osv. til eksisterende kunder.</li>
+      <li><strong>Gjenkjøp</strong> – «Det er 6 uker siden sist. Vil du booke ny time?»</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Eksempel – Per Herrefrisør</h2>
+    <div class="example">
+      <strong>Booking-bekreftelse:</strong><br>
+      «Hei Gunnar! Du er booket hos Per Herrefrisør i morgen kl. 14:00. Adresse: Kongens gate 12, Steinkjer. Avbestill på 74 12 34 56.»
+    </div>
+    <div class="example">
+      <strong>Stille dag:</strong><br>
+      «Hei! Vi har ledige tider i dag etter kl. 13. Klipp 450 kr. Svar BOOK for å reservere.»
+    </div>
+    <div class="example">
+      <strong>Før jul / 17. mai:</strong><br>
+      «Julen nærmer seg. Sikre deg time hos Per før det blir fullt. Book her: [lenke]»
+    </div>
+  </div>
+  <div class="card">
+    <h2>Del av telefontjenesten</h2>
+    <p>SMS-oppfølging kan kjøre sammen med AI-telefonagenten:</p>
+    <ul>
+      <li>Kunden ringer → agenten booker → SMS-bekreftelse sendes med en gang</li>
+      <li>Ingen svar på telefon → SMS med «ring oss» eller booking-lenke</li>
+      <li>Samme kundeliste brukes til både telefon og SMS</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Hva du trenger</h2>
+    <ul>
+      <li>Twilio eller lignende SMS-tjeneste (ca. 0,40–0,80 kr per SMS i Norge)</li>
+      <li>Liste over eksisterende kunder (navn + mobil)</li>
+      <li>Kobling til booking (Google Calendar, EasyPractice, Timma e.l.)</li>
+    </ul>
+  </div>
+  <div class="cta">
+    <a href="index.html" class="btn">Tilbake til Jarvis-demo</a>
+  </div>
+</div>
+<footer>
+  SMS Oppfølging · Lenkemotor · Demo for Steinkjer Utvikling
+</footer>
+</body>
+</html>
